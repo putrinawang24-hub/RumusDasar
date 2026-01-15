@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Rumus Spreadsheet</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Load Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // --- ICON COMPONENTS (SVG Manual untuk menghindari dependency library) ---
+        const CalculatorIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+        );
+        const BookOpenIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        );
+        const HashIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg>
+        );
+        const BarChartIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+        );
+        const InfoIcon = ({ size, className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        );
+        const GamepadIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="2"/></svg>
+        );
+        const LightbulbIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+        );
+
+        // --- SUB COMPONENTS ---
+
+        const SectionHeader = ({ title, desc }) => (
+            <div className="mb-6 border-b pb-4">
+                <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+                <p className="text-gray-500 mt-1">{desc}</p>
+            </div>
+        );
+
+        const AnalogyBox = ({ title, analogies }) => (
+            <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-5">
+                <div className="flex items-center gap-2 mb-3 text-amber-800 font-bold text-lg">
+                    <LightbulbIcon className="w-5 h-5" />
+                    {title}
+                </div>
+                <div className="space-y-3">
+                    {analogies.map((item, idx) => (
+                        <div key={idx} className="flex gap-3 items-start">
+                            <span className="font-mono font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded text-sm whitespace-nowrap">{item.label}</span>
+                            <p className="text-amber-900 text-sm leading-relaxed">{item.text}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const FormulaCard = ({ name, syntax, syntaxDesc, desc, exampleFormula, result }) => (
+            <div className="mb-6 bg-slate-50 rounded-lg border border-slate-200 overflow-hidden">
+                <div className="bg-slate-100 px-4 py-2 border-b border-slate-200 flex justify-between items-center">
+                    <span className="font-bold text-emerald-700 font-mono text-lg">{name}</span>
+                    <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Rumus</span>
+                </div>
+                <div className="p-4 space-y-3">
+                    <p className="text-gray-700 text-sm">{desc}</p>
+                    
+                    <div className="bg-white p-3 rounded border border-gray-200 font-mono text-sm text-blue-600">
+                        <span className="text-gray-400 select-none">Sintaks: </span>
+                        {syntax}
+                    </div>
+
+                    {/* Syntax Description Section */}
+                    {syntaxDesc && (
+                        <div className="text-xs text-gray-600 bg-blue-50/50 p-3 rounded border border-blue-100">
+                             <div className="font-bold text-blue-800 mb-1">Keterangan Sintaks:</div>
+                             <ul className="list-disc list-outside ml-4 space-y-1">
+                                {syntaxDesc.map((item, idx) => {
+                                    const [key, val] = item.split(':');
+                                    return (
+                                        <li key={idx}>
+                                            <span className="font-mono text-purple-700 font-semibold">{key}</span>: 
+                                            <span>{val}</span>
+                                        </li>
+                                    );
+                                })}
+                             </ul>
+                        </div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row gap-4 mt-2">
+                        <div className="flex-1">
+                            <div className="text-xs text-gray-500 mb-1">Contoh Rumus:</div>
+                            <code className="block bg-gray-800 text-yellow-300 p-2 rounded text-sm font-mono">
+                                {exampleFormula}
+                            </code>
+                        </div>
+                        <div className="sm:w-32">
+                            <div className="text-xs text-gray-500 mb-1">Hasil:</div>
+                            <div className="bg-emerald-100 text-emerald-800 p-2 rounded text-sm font-bold text-center border border-emerald-200">
+                                {result}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const DataTable = ({ data, highlightFilter }) => (
+            <div className="mb-8 overflow-x-auto border rounded-lg shadow-sm bg-white">
+                <table className="w-full text-sm text-left">
+                    <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
+                        <tr>
+                            <th className="px-4 py-3">No</th>
+                            <th className="px-4 py-3">Produk</th>
+                            <th className={`px-4 py-3 ${highlightFilter === 'region' ? 'bg-indigo-100 text-indigo-700 font-bold' : ''}`}>Region</th>
+                            <th className="px-4 py-3 text-right">Penjualan (Sales)</th>
+                            <th className={`px-4 py-3 ${highlightFilter === 'status' ? 'bg-indigo-100 text-indigo-700 font-bold' : ''}`}>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                        {data.map((row, idx) => (
+                            <tr key={idx} className="hover:bg-gray-50 bg-white">
+                                <td className="px-4 py-2 text-gray-500">{row.id}</td>
+                                <td className="px-4 py-2 font-medium">{row.product || <span className="text-red-300 italic">(kosong)</span>}</td>
+                                <td className={`px-4 py-2 ${highlightFilter === 'region' ? 'bg-indigo-50' : ''}`}>{row.region}</td>
+                                <td className="px-4 py-2 text-right font-mono text-gray-600">
+                                    {row.sales > 0 ? row.sales.toLocaleString('id-ID') : '-'}
+                                </td>
+                                <td className={`px-4 py-2 ${highlightFilter === 'status' ? 'bg-indigo-50' : ''}`}>
+                                    <span className={`px-2 py-1 rounded text-xs ${
+                                        row.status === 'Lunas' ? 'bg-green-100 text-green-700' :
+                                        row.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
+                                        row.status === 'Batal' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-400'
+                                    }`}>
+                                        {row.status || 'Blank'}
+                                    </span>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+
+        // --- SECTIONS ---
+
+        const MinMaxSection = ({ data }) => {
+            const salesValues = data.map(d => d.sales).filter(v => v > 0);
+            const maxVal = Math.max(...salesValues);
+            const minVal = Math.min(...salesValues);
+
+            return (
+                <div>
+                    <SectionHeader title="Fungsi MIN & MAX" desc="Mencari nilai ekstrem (terendah dan tertinggi) dalam sekumpulan data." />
+                    <DataTable data={data} />
+                    
+                    <div className="grid gap-6">
+                        <FormulaCard 
+                            name="MIN"
+                            syntax="=MIN(range_angka)"
+                            syntaxDesc={[
+                                "range_angka: Area sel yang berisi angka yang ingin dicari nilai terendahnya (contoh: D2:D7)."
+                            ]}
+                            desc="Mengembalikan nilai numerik terkecil dari rentang sel yang dipilih."
+                            exampleFormula="=MIN(D2:D7)"
+                            result={minVal.toLocaleString('id-ID')}
+                        />
+                        <FormulaCard 
+                            name="MAX"
+                            syntax="=MAX(range_angka)"
+                            syntaxDesc={[
+                                "range_angka: Area sel yang berisi angka yang ingin dicari nilai tertingginya."
+                            ]}
+                            desc="Mengembalikan nilai numerik terbesar dari rentang sel yang dipilih."
+                            exampleFormula="=MAX(D2:D7)"
+                            result={maxVal.toLocaleString('id-ID')}
+                        />
+                    </div>
+                </div>
+            );
+        };
+
+        const SumSection = ({ data }) => {
+            const totalSales = data.reduce((acc, curr) => acc + curr.sales, 0);
+            const sumIf = data.filter(d => d.region === 'Jakarta').reduce((acc, curr) => acc + curr.sales, 0);
+            const sumIfs = data.filter(d => d.product === 'Laptop' && d.status === 'Lunas').reduce((acc, curr) => acc + curr.sales, 0);
+
+            return (
+                <div>
+                    <SectionHeader title="Fungsi Penjumlahan (SUM)" desc="Menjumlahkan data angka dengan berbagai kondisi." />
+                    <DataTable data={data} />
+
+                    <AnalogyBox 
+                        title="Analogi Sederhana: Keranjang Belanja"
+                        analogies={[
+                            { label: "SUM", text: "Kasir menghitung TOTAL HARGA semua barang yang ada di keranjang, tanpa pilih-pilih." },
+                            { label: "SUMIF", text: "Kasir menghitung total harga CUMA untuk barang 'Buah Apel' saja. (1 Syarat)" },
+                            { label: "SUMIFS", text: "Kasir menghitung total harga 'Buah Apel' TAPI yang jenisnya 'Fuji' saja. (2 Syarat atau lebih: Apel + Fuji)" }
+                        ]}
+                    />
+
+                    <div className="space-y-1 mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
+                        <strong>💡 Tips Penting:</strong> Perhatikan perbedaan urutan argumen pada SUMIF dan SUMIFS!
+                        <ul className="list-disc ml-5 mt-1">
+                            <li>SUMIF: Range Kriteria dulu, baru Range Sum.</li>
+                            <li>SUMIFS: Range Sum dulu, baru Kriteria-kriterianya.</li>
+                        </ul>
+                    </div>
+
+                    <div className="grid gap-6">
+                        <FormulaCard 
+                            name="SUM"
+                            syntax="=SUM(number1, [number2], ...)"
+                            syntaxDesc={[
+                                "number1...: Sel atau kumpulan sel yang berisi angka untuk dijumlahkan."
+                            ]}
+                            desc="Menjumlahkan semua angka dalam rentang sel."
+                            exampleFormula="=SUM(D2:D7)"
+                            result={totalSales.toLocaleString('id-ID')}
+                        />
+                        <FormulaCard 
+                            name="SUMIF"
+                            syntax="=SUMIF(range_kriteria, kriteria, [sum_range])"
+                            syntaxDesc={[
+                                "range_kriteria: Kolom data yang akan dicek syaratnya (misal: kolom Kota).",
+                                "kriteria: Syarat yang harus dipenuhi (misal: \"Jakarta\").",
+                                "sum_range: (Opsional) Kolom angka yang sebenarnya mau dijumlahkan."
+                            ]}
+                            desc="Menjumlahkan angka jika memenuhi SATU kondisi. (Contoh: Total penjualan region 'Jakarta')."
+                            exampleFormula='=SUMIF(C2:C7, "Jakarta", D2:D7)'
+                            result={sumIf.toLocaleString('id-ID')}
+                        />
+                        <FormulaCard 
+                            name="SUMIFS"
+                            syntax="=SUMIFS(sum_range, kriteria_range1, kriteria1, ...)"
+                            syntaxDesc={[
+                                "sum_range: Kolom angka yang mau dijumlahkan.",
+                                "kriteria_range1: Kolom pertama yang akan dicek syaratnya.",
+                                "kriteria1: Syarat untuk kolom pertama.",
+                                "...: Pasangan range dan kriteria selanjutnya (opsional)."
+                            ]}
+                            desc="Menjumlahkan angka jika memenuhi BANYAK kondisi. (Contoh: Produk 'Laptop' YANG statusnya 'Lunas')."
+                            exampleFormula='=SUMIFS(D2:D7, B2:B7, "Laptop", E2:E7, "Lunas")'
+                            result={sumIfs.toLocaleString('id-ID')}
+                        />
+                    </div>
+                </div>
+            );
+        };
+
+        const AverageSection = ({ data }) => {
+            const validSales = data.filter(d => d.sales > 0);
+            const avg = validSales.reduce((acc, c) => acc + c.sales, 0) / validSales.length;
+            
+            const jktSales = data.filter(d => d.region === 'Jakarta');
+            const avgIf = jktSales.reduce((acc, c) => acc + c.sales, 0) / jktSales.length;
+
+            const complexSales = data.filter(d => d.product === 'Laptop' && d.region === 'Jakarta');
+            const avgIfs = complexSales.reduce((acc, c) => acc + c.sales, 0) / complexSales.length;
+
+            return (
+                <div>
+                    <SectionHeader title="Fungsi Rata-Rata (AVERAGE)" desc="Mencari nilai tengah (mean) dari data." />
+                    <DataTable data={data} />
+
+                    <AnalogyBox 
+                        title="Analogi Sederhana: Nilai Rapor Kelas"
+                        analogies={[
+                            { label: "AVERAGE", text: "Guru menghitung rata-rata nilai matematika dari SEMUA murid di kelas." },
+                            { label: "AVERAGEIF", text: "Guru menghitung rata-rata nilai matematika murid PEREMPUAN saja. (1 Syarat)" },
+                            { label: "AVERAGEIFS", text: "Guru menghitung rata-rata nilai murid PEREMPUAN yang duduk di BARIS DEPAN. (2 Syarat atau lebih)" }
+                        ]}
+                    />
+
+                    <div className="grid gap-6">
+                        <FormulaCard 
+                            name="AVERAGE"
+                            syntax="=AVERAGE(number1, [number2], ...)"
+                            syntaxDesc={[
+                                "number1...: Sel atau kumpulan sel angka yang mau dicari rata-ratanya."
+                            ]}
+                            desc="Menghitung rata-rata aritmatika dari argumen."
+                            exampleFormula="=AVERAGE(D2:D6)"
+                            result={avg.toLocaleString('id-ID')}
+                        />
+                        <FormulaCard 
+                            name="AVERAGEIF"
+                            syntax="=AVERAGEIF(range, criteria, [average_range])"
+                            syntaxDesc={[
+                                "range: Kolom data yang akan dicek syaratnya.",
+                                "criteria: Syarat filter nilai.",
+                                "average_range: (Opsional) Kolom angka yang dihitung rata-ratanya."
+                            ]}
+                            desc="Rata-rata dengan SATU kriteria. (Contoh: Rata-rata penjualan region 'Jakarta')."
+                            exampleFormula='=AVERAGEIF(C2:C7, "Jakarta", D2:D7)'
+                            result={avgIf.toLocaleString('id-ID')}
+                        />
+                        <FormulaCard 
+                            name="AVERAGEIFS"
+                            syntax="=AVERAGEIFS(avg_range, criteria_range1, criteria1, ...)"
+                            syntaxDesc={[
+                                "avg_range: Kolom angka yang mau dihitung rata-ratanya.",
+                                "criteria_range1: Kolom pertama yang akan dicek.",
+                                "criteria1: Syarat untuk kolom pertama."
+                            ]}
+                            desc="Rata-rata dengan BANYAK kriteria. (Contoh: Rata-rata 'Laptop' di 'Jakarta')."
+                            exampleFormula='=AVERAGEIFS(D2:D7, B2:B7, "Laptop", C2:C7, "Jakarta")'
+                            result={avgIfs.toLocaleString('id-ID')}
+                        />
+                    </div>
+                </div>
+            );
+        };
+
+        const CountSection = ({ data }) => {
+            const countIf = data.filter(d => d.status === 'Lunas').length;
+            const countIfs = data.filter(d => d.region === 'Bandung' && d.sales > 100000).length;
+
+            return (
+                <div>
+                    <SectionHeader title="Fungsi Perhitungan Data (COUNT)" desc="Menghitung BANYAKNYA data (bukan menjumlahkan nilainya)." />
+                    <DataTable data={data} />
+
+                    <AnalogyBox 
+                        title="Analogi Sederhana: Absensi Peserta"
+                        analogies={[
+                            { label: "COUNT/A", text: "Panitia menghitung total semua orang yang hadir di ruangan (Hitung Kepala)." },
+                            { label: "COUNTIF", text: "Panitia menghitung berapa jumlah peserta yang memakai KEMEJA PUTIH. (1 Syarat)" },
+                            { label: "COUNTIFS", text: "Panitia menghitung peserta berkemeja PUTIH yang juga membawa LAPTOP. (2 Syarat atau lebih)" }
+                        ]}
+                    />
+
+                    <div className="grid gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="bg-blue-50 p-4 rounded border border-blue-100">
+                                <h3 className="font-bold text-blue-800 mb-2">COUNT</h3>
+                                <p className="text-sm text-blue-600 mb-2">Hanya hitung sel berisi <strong>ANGKA</strong>.</p>
+                                <code className="block bg-white px-2 py-1 rounded border text-xs">=COUNT(D2:D7)</code>
+                                <div className="mt-2 font-bold text-xl text-right">6</div>
+                            </div>
+                            <div className="bg-purple-50 p-4 rounded border border-purple-100">
+                                <h3 className="font-bold text-purple-800 mb-2">COUNTA</h3>
+                                <p className="text-sm text-purple-600 mb-2">Hitung sel <strong>TIDAK KOSONG</strong> (Angka/Teks).</p>
+                                <code className="block bg-white px-2 py-1 rounded border text-xs">=COUNTA(B2:B7)</code>
+                                <div className="mt-2 font-bold text-xl text-right">5</div>
+                            </div>
+                            <div className="bg-gray-100 p-4 rounded border border-gray-200">
+                                <h3 className="font-bold text-gray-800 mb-2">COUNTBLANK</h3>
+                                <p className="text-sm text-gray-600 mb-2">Hitung sel yang benar-benar <strong>KOSONG</strong>.</p>
+                                <code className="block bg-white px-2 py-1 rounded border text-xs">=COUNTBLANK(B2:B7)</code>
+                                <div className="mt-2 font-bold text-xl text-right">1</div>
+                            </div>
+                        </div>
+
+                        <div className="border-t pt-4 mt-2">
+                            <h3 className="font-bold text-lg mb-4">Menghitung dengan Kondisi</h3>
+                            <FormulaCard 
+                            name="COUNTIF"
+                            syntax="=COUNTIF(range, criteria)"
+                            syntaxDesc={[
+                                "range: Area sel yang mau dihitung jumlah datanya.",
+                                "criteria: Syarat data yang mau dihitung (misal: \"Lunas\")."
+                            ]}
+                            desc="Menghitung banyak data dengan SATU syarat. (Contoh: Berapa banyak transaksi 'Lunas'?)"
+                            exampleFormula='=COUNTIF(E2:E7, "Lunas")'
+                            result={countIf}
+                            />
+                            <FormulaCard 
+                            name="COUNTIFS"
+                            syntax="=COUNTIFS(criteria_range1, criteria1, ...)"
+                            syntaxDesc={[
+                                "criteria_range1: Area sel pertama yang mau dicek.",
+                                "criteria1: Syarat untuk area pertama.",
+                                "...: Pasangan range dan kriteria selanjutnya."
+                            ]}
+                            desc="Menghitung banyak data dengan BANYAK syarat. (Contoh: Transaksi di 'Bandung' yang nilainya > 100.000)."
+                            exampleFormula='=COUNTIFS(C2:C7, "Bandung", D2:D7, ">100000")'
+                            result={countIfs}
+                            />
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const PlaygroundSection = ({ data }) => {
+            const [operation, setOperation] = useState('SUM');
+            const [filterType, setFilterType] = useState('none');
+            const [filterValue, setFilterValue] = useState('');
+
+            const regions = [...new Set(data.filter(d => d.region).map(d => d.region))];
+            const statuses = [...new Set(data.filter(d => d.status).map(d => d.status))];
+
+            let result = 0;
+            let formulaText = '';
+            let filteredData = data;
+
+            if (filterType !== 'none' && filterValue) {
+                filteredData = data.filter(item => item[filterType] === filterValue);
+            } else {
+                if (filterType === 'none' && filterValue !== '') setFilterValue('');
+            }
+
+            const values = filteredData.map(d => d.sales);
+            const numericValues = values.filter(v => typeof v === 'number' && v > 0);
+
+            const rangeSales = 'D2:D7';
+            const rangeRegion = 'C2:C7';
+            const rangeStatus = 'E2:E7';
+            const criteriaRange = filterType === 'region' ? rangeRegion : rangeStatus;
+            
+            switch (operation) {
+                case 'SUM':
+                    if (filterType === 'none') {
+                        result = data.reduce((acc, c) => acc + c.sales, 0);
+                        formulaText = `=SUM(${rangeSales})`;
+                    } else {
+                        result = filteredData.reduce((acc, c) => acc + c.sales, 0);
+                        formulaText = `=SUMIF(${criteriaRange}, "${filterValue}", ${rangeSales})`;
+                    }
+                    break;
+                case 'AVERAGE':
+                    if (numericValues.length > 0) {
+                        result = numericValues.reduce((a, b) => a + b, 0) / numericValues.length;
+                    } else {
+                        result = 0;
+                    }
+                    if (filterType === 'none') {
+                        formulaText = `=AVERAGE(${rangeSales})`;
+                    } else {
+                        formulaText = `=AVERAGEIF(${criteriaRange}, "${filterValue}", ${rangeSales})`;
+                    }
+                    break;
+                case 'MAX':
+                    result = numericValues.length ? Math.max(...numericValues) : 0;
+                    if (filterType === 'none') {
+                        formulaText = `=MAX(${rangeSales})`;
+                    } else {
+                        formulaText = `=MAXIFS(${rangeSales}, ${criteriaRange}, "${filterValue}")`;
+                    }
+                    break;
+                case 'MIN':
+                    result = numericValues.length ? Math.min(...numericValues) : 0;
+                    if (filterType === 'none') {
+                        formulaText = `=MIN(${rangeSales})`;
+                    } else {
+                        formulaText = `=MINIFS(${rangeSales}, ${criteriaRange}, "${filterValue}")`;
+                    }
+                    break;
+                case 'COUNT':
+                    if (filterType === 'none') {
+                        result = data.filter(d => d.sales > 0).length + 1;
+                        formulaText = `=COUNT(${rangeSales})`;
+                    } else {
+                        result = filteredData.length;
+                        formulaText = `=COUNTIF(${criteriaRange}, "${filterValue}")`;
+                    }
+                    break;
+                default:
+                    result = 0;
+            }
+
+            const handleFilterTypeChange = (e) => {
+                const type = e.target.value;
+                setFilterType(type);
+                if (type === 'region') setFilterValue(regions[0]);
+                if (type === 'status') setFilterValue(statuses[0]);
+                if (type === 'none') setFilterValue('');
+            };
+
+            return (
+                <div className="space-y-6">
+                    <div className="bg-white p-6 rounded-lg shadow-sm border border-indigo-100">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">1. Ingin mencari nilai apa?</label>
+                                <select 
+                                    value={operation} 
+                                    onChange={(e) => setOperation(e.target.value)}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50"
+                                >
+                                    <option value="SUM">Total Penjualan (SUM)</option>
+                                    <option value="AVERAGE">Rata-rata Penjualan (AVERAGE)</option>
+                                    <option value="MAX">Penjualan Tertinggi (MAX)</option>
+                                    <option value="MIN">Penjualan Terendah (MIN)</option>
+                                    <option value="COUNT">Banyak Transaksi (COUNT)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">2. Filter data berdasarkan?</label>
+                                <div className="flex gap-2">
+                                    <select 
+                                        value={filterType} 
+                                        onChange={handleFilterTypeChange}
+                                        className="w-1/2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-gray-50"
+                                    >
+                                        <option value="none">Semua Data (Tanpa Filter)</option>
+                                        <option value="region">Region / Wilayah</option>
+                                        <option value="status">Status Pembayaran</option>
+                                    </select>
+
+                                    {filterType !== 'none' && (
+                                        <select 
+                                            value={filterValue} 
+                                            onChange={(e) => setFilterValue(e.target.value)}
+                                            className="w-1/2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
+                                        >
+                                            {filterType === 'region' && regions.map(r => <option key={r} value={r}>{r}</option>)}
+                                            {filterType === 'status' && statuses.map(s => <option key={s} value={s}>{s}</option>)}
+                                        </select>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-indigo-900 text-white p-6 rounded-lg shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="flex-1 space-y-2">
+                            <div className="text-indigo-300 text-sm font-semibold uppercase tracking-wider">Rumus Excel Otomatis</div>
+                            <code className="block bg-black/30 p-3 rounded-lg font-mono text-lg text-yellow-400 break-all">
+                                {formulaText}
+                            </code>
+                            <p className="text-xs text-indigo-300 italic">
+                                *Rumus di atas menyesuaikan secara otomatis dengan pilihanmu.
+                            </p>
+                        </div>
+                        
+                        <div className="text-center min-w-[150px]">
+                            <div className="text-indigo-300 text-xs mb-1">HASIL</div>
+                            <div className="text-4xl font-bold">
+                                {operation === 'COUNT' ? result : result.toLocaleString('id-ID')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-4">
+                        <div className="text-sm font-medium text-gray-500 mb-2 flex items-center gap-2">
+                            <InfoIcon size={16} /> 
+                            Data yang digunakan (Baris yang cocok disorot):
+                        </div>
+                        <DataTable data={data} highlightFilter={filterType} />
+                    </div>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+
+        const App = () => {
+            const salesData = [
+                { id: 1, product: 'Laptop', region: 'Jakarta', sales: 15000000, status: 'Lunas' },
+                { id: 2, product: 'Mouse', region: 'Bandung', sales: 200000, status: 'Pending' },
+                { id: 3, product: 'Laptop', region: 'Jakarta', sales: 14500000, status: 'Lunas' },
+                { id: 4, product: 'Keyboard', region: 'Surabaya', sales: 500000, status: 'Lunas' },
+                { id: 5, product: 'Mouse', region: 'Jakarta', sales: 250000, status: 'Batal' },
+                { id: 6, product: '', region: 'Bandung', sales: 0, status: '' },
+            ];
+
+            return (
+                <div className="min-h-screen bg-gray-50 text-slate-800 font-sans">
+                    <header className="bg-emerald-600 text-white p-6 shadow-lg sticky top-0 z-20">
+                        <div className="max-w-4xl mx-auto">
+                            <h1 className="text-3xl font-bold flex items-center gap-2">
+                                <CalculatorIcon className="w-8 h-8" />
+                                Master Rumus Spreadsheet
+                            </h1>
+                            <p className="mt-2 text-emerald-100 opacity-90">Panduan lengkap fungsi MIN/MAX, SUM, AVERAGE, dan COUNT.</p>
+                        </div>
+                    </header>
+
+                    <main className="max-w-4xl mx-auto p-4 md:p-6 space-y-8">
+                        
+                        {/* Section 1 */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div className="flex items-center gap-3 mb-4 text-emerald-600">
+                                <BarChartIcon className="w-6 h-6" />
+                                <span className="font-bold text-lg uppercase tracking-wider">Bagian 1</span>
+                            </div>
+                            <MinMaxSection data={salesData} />
+                        </div>
+
+                        {/* Section 2 */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div className="flex items-center gap-3 mb-4 text-emerald-600">
+                                <CalculatorIcon className="w-6 h-6" />
+                                <span className="font-bold text-lg uppercase tracking-wider">Bagian 2</span>
+                            </div>
+                            <SumSection data={salesData} />
+                        </div>
+
+                        {/* Section 3 */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div className="flex items-center gap-3 mb-4 text-emerald-600">
+                                <BookOpenIcon className="w-6 h-6" />
+                                <span className="font-bold text-lg uppercase tracking-wider">Bagian 3</span>
+                            </div>
+                            <AverageSection data={salesData} />
+                        </div>
+
+                        {/* Section 4 */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div className="flex items-center gap-3 mb-4 text-emerald-600">
+                                <HashIcon className="w-6 h-6" />
+                                <span className="font-bold text-lg uppercase tracking-wider">Bagian 4</span>
+                            </div>
+                            <CountSection data={salesData} />
+                        </div>
+
+                        {/* Section 5 Playground */}
+                        <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl shadow-md border border-indigo-100 p-6 md:p-8">
+                            <div className="flex items-center gap-3 mb-6 text-indigo-700 border-b border-indigo-200 pb-4">
+                                <GamepadIcon className="w-8 h-8" />
+                                <div>
+                                    <span className="font-bold text-2xl">Playground Rumus</span>
+                                    <p className="text-sm text-indigo-500 font-medium">Eksperimen data secara interaktif</p>
+                                </div>
+                            </div>
+                            <PlaygroundSection data={salesData} />
+                        </div>
+
+                    </main>
+
+                    <footer className="text-center py-8 text-gray-400 text-sm bg-gray-100 mt-8 border-t">
+                        Dibuat untuk pembelajaran Excel/Google Sheets
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
