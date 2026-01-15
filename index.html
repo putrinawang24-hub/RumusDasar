@@ -47,6 +47,9 @@
         const LightbulbIcon = ({ className }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
         );
+        const PuzzleIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19.439 15.424a1 1 0 0 0-1.439-1.408l-5 4.908-2.618-2.57a1 1 0 0 0-1.4 1.426l3.324 3.262a1 1 0 0 0 1.413 0l5.72-5.618z"/><path d="M12 3a9 9 0 0 0-9 9 9 9 0 0 0 9 9 9 9 0 0 0 9-9 9 9 0 0 0-9-9zm0 16a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"/></svg>
+        );
 
         // --- SUB COMPONENTS ---
 
@@ -413,6 +416,7 @@
             let result = 0;
             let formulaText = '';
             let filteredData = data;
+            let formulaParts = [];
 
             if (filterType !== 'none' && filterValue) {
                 filteredData = data.filter(item => item[filterType] === filterValue);
@@ -433,9 +437,17 @@
                     if (filterType === 'none') {
                         result = data.reduce((acc, c) => acc + c.sales, 0);
                         formulaText = `=SUM(${rangeSales})`;
+                        formulaParts = [
+                            { code: rangeSales, label: 'range', desc: 'Area data penjualan yang akan dijumlahkan.' }
+                        ];
                     } else {
                         result = filteredData.reduce((acc, c) => acc + c.sales, 0);
                         formulaText = `=SUMIF(${criteriaRange}, "${filterValue}", ${rangeSales})`;
+                        formulaParts = [
+                            { code: criteriaRange, label: 'range', desc: `Area kolom ${filterType} untuk dicek syaratnya.` },
+                            { code: `"${filterValue}"`, label: 'criteria', desc: `Syarat nilai yang dicari (${filterValue}).` },
+                            { code: rangeSales, label: 'sum_range', desc: 'Area data penjualan yang akan dijumlahkan jika syarat terpenuhi.' }
+                        ];
                     }
                     break;
                 case 'AVERAGE':
@@ -446,33 +458,64 @@
                     }
                     if (filterType === 'none') {
                         formulaText = `=AVERAGE(${rangeSales})`;
+                        formulaParts = [
+                            { code: rangeSales, label: 'range', desc: 'Area data penjualan yang akan dihitung rata-ratanya.' }
+                        ];
                     } else {
                         formulaText = `=AVERAGEIF(${criteriaRange}, "${filterValue}", ${rangeSales})`;
+                        formulaParts = [
+                            { code: criteriaRange, label: 'range', desc: `Area kolom ${filterType} untuk dicek syaratnya.` },
+                            { code: `"${filterValue}"`, label: 'criteria', desc: `Syarat nilai yang dicari (${filterValue}).` },
+                            { code: rangeSales, label: 'average_range', desc: 'Area data penjualan yang akan dihitung rata-ratanya.' }
+                        ];
                     }
                     break;
                 case 'MAX':
                     result = numericValues.length ? Math.max(...numericValues) : 0;
                     if (filterType === 'none') {
                         formulaText = `=MAX(${rangeSales})`;
+                        formulaParts = [
+                            { code: rangeSales, label: 'range', desc: 'Area data penjualan untuk dicari nilai tertingginya.' }
+                        ];
                     } else {
                         formulaText = `=MAXIFS(${rangeSales}, ${criteriaRange}, "${filterValue}")`;
+                        formulaParts = [
+                            { code: rangeSales, label: 'max_range', desc: 'Area data penjualan untuk dicari nilai tertingginya.' },
+                            { code: criteriaRange, label: 'criteria_range1', desc: `Area kolom ${filterType} untuk dicek syaratnya.` },
+                            { code: `"${filterValue}"`, label: 'criteria1', desc: `Syarat nilai yang dicari (${filterValue}).` }
+                        ];
                     }
                     break;
                 case 'MIN':
                     result = numericValues.length ? Math.min(...numericValues) : 0;
                     if (filterType === 'none') {
                         formulaText = `=MIN(${rangeSales})`;
+                        formulaParts = [
+                            { code: rangeSales, label: 'range', desc: 'Area data penjualan untuk dicari nilai terendahnya.' }
+                        ];
                     } else {
                         formulaText = `=MINIFS(${rangeSales}, ${criteriaRange}, "${filterValue}")`;
+                        formulaParts = [
+                            { code: rangeSales, label: 'min_range', desc: 'Area data penjualan untuk dicari nilai terendahnya.' },
+                            { code: criteriaRange, label: 'criteria_range1', desc: `Area kolom ${filterType} untuk dicek syaratnya.` },
+                            { code: `"${filterValue}"`, label: 'criteria1', desc: `Syarat nilai yang dicari (${filterValue}).` }
+                        ];
                     }
                     break;
                 case 'COUNT':
                     if (filterType === 'none') {
                         result = data.filter(d => d.sales > 0).length + 1;
                         formulaText = `=COUNT(${rangeSales})`;
+                        formulaParts = [
+                            { code: rangeSales, label: 'range', desc: 'Area data yang akan dihitung jumlah selnya.' }
+                        ];
                     } else {
                         result = filteredData.length;
                         formulaText = `=COUNTIF(${criteriaRange}, "${filterValue}")`;
+                        formulaParts = [
+                            { code: criteriaRange, label: 'range', desc: `Area kolom ${filterType} untuk dicek syaratnya.` },
+                            { code: `"${filterValue}"`, label: 'criteria', desc: `Syarat nilai yang dicari (${filterValue}).` }
+                        ];
                     }
                     break;
                 default:
@@ -550,6 +593,23 @@
                             <div className="text-4xl font-bold">
                                 {operation === 'COUNT' ? result : result.toLocaleString('id-ID')}
                             </div>
+                        </div>
+                    </div>
+
+                    {/* NEW: Formula Breakdown Section */}
+                    <div className="bg-white border border-indigo-100 rounded-lg p-5">
+                         <div className="flex items-center gap-2 mb-3 text-indigo-800 font-bold text-lg">
+                            <PuzzleIcon className="w-5 h-5" />
+                            Bedah Rumus (Formula Breakdown)
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            {formulaParts.map((part, idx) => (
+                                <div key={idx} className="bg-slate-50 border border-slate-200 rounded p-3 flex flex-col gap-1 shadow-sm">
+                                    <div className="font-mono text-sm font-bold text-gray-800 bg-white border px-2 py-1 rounded w-fit mb-1">{part.code}</div>
+                                    <div className="text-xs font-bold uppercase tracking-wider text-indigo-600">{part.label}</div>
+                                    <div className="text-xs text-gray-600 leading-snug">{part.desc}</div>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
